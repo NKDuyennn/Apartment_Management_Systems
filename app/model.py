@@ -2,8 +2,9 @@ from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
 from app.extension import db
+from flask_login import UserMixin
 
-class TaiKhoan(db.Model):
+class TaiKhoan(db.Model, UserMixin):
     __tablename__ = 'taikhoan'
 
     id = db.Column(db.Integer, primary_key=True)
