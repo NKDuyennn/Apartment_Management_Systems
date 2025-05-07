@@ -30,7 +30,7 @@
                     {% if current_user.vaiTro == 'admin' %}
                         <!-- Admin (Tổ trưởng) -->
                         <li>
-                            <a href="#" class="menu-item">
+                            <a href="{{ url_for('user.taikhoan') }}" class="menu-item {% if request.endpoint == 'user.taikhoan' %}active{% endif %}">
                                 <i class="fas fa-user"></i>
                                 <span>Tài khoản</span>
                             </a>
