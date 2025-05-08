@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% block title %}Quản lý hộ khẩu{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="/static/css/hokhau.css">
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>Quản lý hộ khẩu</h1>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    
+    <div class="search-container">
+        <input type="text" id="searchInput" class="search-box" placeholder="Tìm kiếm ...">
+        <button class="add-button" onclick="openAddModal()">+ Thêm hộ khẩu</button>
+    </div>
+
+
+    <div class="card">
+        <table class="account-table">
+            <thead>
+                <tr>
+                    <th>Mã Hộ Khẩu</th>
+                    <th>Chủ Hộ</th>
+                    <th>Địa chỉ</th>
+                    <th>Ngày tạo</th>
+                    <th class="action-column">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for hokhau in hokhaus %}
+                <tr>
+                    <td>{{ hokhau.maHoKhau }}</td>
+                    <td>{{ hokhau.chuHo }}</td>
+                    <td>{{ hokhau.diaChi }}</td>
+                    <td>{{ hokhau.ngayLap }}</td>
+                    <td class="action-column">
+                        <a href="{{ url_for('hk.hokhau_chitiet', maHoKhau=hokhau.maHoKhau) }}" class="action-button">
+                            Chi tiết
+                        </a>                        
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Add Account Modal -->
+<div id="addHoKhauModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeAddModal()">×</span>
+        <h2>Thêm hộ khẩu mới</h2>
+        <form id="addHoKhauForm">
+            <!-- <div class="form-group">
+                <label for="maHoKhau">Mã hộ khẩu</label>
+                <input type="text" class="form-control" id="maHoKhau" name="maHoKhau" required>
+            </div> -->
+            <div class="form-group">
+                <label for="diaChi">Địa chỉ</label>
+                <input type="text" class="form-control" id="diaChi" name="diaChi" required>
+            </div>
+            <div class="form-group">
+                <label for="ngayLap">Ngày lập</label>
+                <input type="date" class="form-control" id="ngayLap" name="ngayLap" required>
+            </div>
+
+            <div class="form-group">
+                <label for="chuHo">Chủ hộ</label>
+                <select class="form-control" id="chuHo" name="chuHo" required>
+                    <option value="">-- Chọn chủ hộ --</option>
+                    <option value="1">Duyên</option>
+                    <option value="2">Nam</option>
+                    <option value="3">Lan</option>
+                </select>
+            </div>
+            <button type="submit" class="btn-submit">Thêm hộ khẩu</button>
+        </form>
+    </div>
+</div>
+
+
+{% endblock %}
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/hokhau.js') }}"></script>
+{% endblock %}

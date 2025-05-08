@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block title %}Chi tiết hộ khẩu - Mã {{ hokhau.maHoKhau }}{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="/static/css/hokhau.css">
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>Chi tiết hộ khẩu - Mã {{ hokhau.maHoKhau }}</h1>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <div class="card">
+        <div class="card-header">
+            <h2>Thông tin hộ khẩu</h2>
+        </div>
+        <div class="card-body">
+            <table class="detail-table">
+                <tr>
+                    <th>Mã hộ khẩu:</th>
+                    <td>{{ hokhau.maHoKhau }}</td>
+                </tr>
+                <tr>
+                    <th>Chủ hộ:</th>
+                    <td>{{ hokhau.chuHo }}</td>
+                </tr>
+                <tr>
+                    <th>Địa chỉ:</th>
+                    <td>{{ hokhau.diaChi }}</td>
+                </tr>
+                <tr>
+                    <th>Ngày lập:</th>
+                    <td>{{ hokhau.ngayLap }}</td>
+                </tr>
+            </table>
+        </div>
+        <div class="card-footer">
+            <a href="{{ url_for('hk.hokhau') }}" class="btn btn-secondary">Quay lại</a>
+            {% if current_user.vaiTro == 'admin' %}
+            <button class="btn btn-primary" onclick="openEditModal()">Chỉnh sửa</button>
+            <button class="btn btn-danger" onclick="deleteHoKhau({{ hokhau.maHoKhau }})">Xóa</button>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Edit Modal -->
+{% if current_user.vaiTro == 'admin' %}
+<div id="editHoKhauModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeEditModal()">×</span>
+        <h2>Chỉnh sửa thông tin hộ khẩu</h2>
+        <form id="editHoKhauForm">
+            <div class="form-group">
+                <label for="editDiaChi">Địa chỉ</label>
+                <input type="text" class="form-control" id="editDiaChi" name="diaChi" value="{{ hokhau.diaChi }}" required>
+            </div>
+            <div class="form-group">
+                <label for="editNgayLap">Ngày lập</label>
+                <input type="text" class="form-control" id="editNgayLap" name="ngayLap" value="{{ hokhau.ngayLap }}" required>
+            </div>
+            <div class="form-group">
+                <label for="editChuHo">Chủ hộ</label>
+                <input type="text" class="form-control" id="editChuHo" name="chuHo" value="{{ hokhau.chuHo }}" required>
+            </div>
+            <button type="submit" class="btn-submit">Lưu thay đổi</button>
+        </form>
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}
+
+{% block extra_js %}
+{% endblock %}

@@ -125,16 +125,18 @@ class HoKhau(db.Model):
     chuHo = db.Column(db.Integer, nullable=False)
     diaChi = db.Column(db.String(255), nullable=False)
     ngayLap = db.Column(db.Date)
-    
+    ngayCapNhat = db.Column(db.Date)
+
     # Relationships
     lichsuhokhau = db.relationship('LichSuHoKhau', backref='hokhau', lazy=True)
     nhankhau = db.relationship('NhanKhau', backref='hokhau', lazy=True)
     
-    def __init__(self, chuHo, diaChi, ngayLap):
+    def __init__(self, chuHo, diaChi, ngayLap, ngayCapNhat):
         self.chuHo = chuHo
         self.diaChi = diaChi
         self.ngayLap = ngayLap
-    
+        self.ngayCapNhat = ngayCapNhat
+
     def __repr__(self):
         return f'<HoKhau {self.maHoKhau}>'
 

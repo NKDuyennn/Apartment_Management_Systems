@@ -36,7 +36,7 @@
                             </a>
                         </li>
                         <li>
-                            <a href="#" class="menu-item">
+                            <a href="{{ url_for('hk.hokhau') }}" class="menu-item {% if request.endpoint == 'hk.hokhau' %}active{% endif %}">
                                 <i class="fas fa-house"></i>
                                 <span>Hộ khẩu</span>
                             </a>
