@@ -58,6 +58,9 @@
         padding: 12px;
         border-bottom: 1px solid #ddd;
         text-align: left;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 
     .account-table th {
@@ -67,6 +70,12 @@
 
     .account-table tr:hover {
         background-color: #f5f5f5;
+    }
+    /* Cột cuối cùng rộng hơn (có class riêng) */
+    .account-table th.action-column,
+    .account-table td.action-column {
+        width: 120px; /* tăng tùy ý */
+        text-align: center;
     }
 
     .action-column {
