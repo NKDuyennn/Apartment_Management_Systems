@@ -77,7 +77,7 @@ def create_app(config_file="config.py"):
     from app.routes import auth_routes, user_routes, hokhau_routes, thuphi_routes
     app.register_blueprint(auth_routes.auth)
     app.register_blueprint(user_routes.user)
-    # app.register_blueprint(hokhau_routes.auth)
+    app.register_blueprint(hokhau_routes.hk)
     # app.register_blueprint(thuphi_routes.auth)
 
     # Khoi tao login manager
