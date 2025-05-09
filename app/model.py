@@ -173,22 +173,21 @@ class LichSuHoKhau(db.Model):
     __tablename__ = 'lichsuhokhau'
     
     id = db.Column(db.Integer, primary_key=True)
-    loaiThayDoi = db.Column(db.String(45))
+    loaiThayDoi = db.Column(db.String(45))          # Thêm, sửa, xóa
     thoiGian = db.Column(db.DateTime)
+    noiDung = db.Column(db.String(1000))         
     maHoKhau = db.Column(db.Integer, db.ForeignKey('hokhau.maHoKhau'))
     maNhanKhau = db.Column(db.Integer, db.ForeignKey('nhankhau.maNhanKhau'))
     
-    def __init__(self, loaiThayDoi, maHoKhau, maNhanKhau, thoiGian):
+    def __init__(self, loaiThayDoi, maHoKhau, maNhanKhau, thoiGian, noiDung):
         self.loaiThayDoi = loaiThayDoi
         self.maHoKhau = maHoKhau
         self.maNhanKhau = maNhanKhau
+        self.noiDung = noiDung
         self.thoiGian = thoiGian if thoiGian else datetime.now()
     
     def __repr__(self):
         return f'<LichSuHoKhau {self.id}>'
-
-
-
 
 
 class TamTruTamVang(db.Model):

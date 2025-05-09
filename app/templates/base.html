@@ -41,6 +41,18 @@
                                 <span>Hộ khẩu</span>
                             </a>
                         </li>
+                        <li>
+                            <a href="{{ url_for('hk.lichsuhokhau') }}" class="menu-item {% if request.endpoint == 'hk.lichsuhokhau' %}active{% endif %}">
+                                <i class="fas fa-house"></i>
+                                <span>Lịch sử</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ url_for('hk.tamtrutamvang') }}" class="menu-item {% if request.endpoint == 'hk.tamtrutamvang' %}active{% endif %}">
+                                <i class="fas fa-house"></i>
+                                <span>Tạm trú/vắng</span>
+                            </a>
+                        </li>
 
                     {% elif current_user.vaiTro == 'Tổ phó' %}
                         <!-- Tổ phó -->

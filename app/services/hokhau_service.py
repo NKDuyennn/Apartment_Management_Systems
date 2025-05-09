@@ -1,5 +1,6 @@
 from app.model import HoKhau, NhanKhau, LichSuHoKhau, TamTruTamVang
 from app import db
+from datetime import datetime
 from sqlalchemy.exc import SQLAlchemyError
 
 class HoKhauService:
@@ -151,3 +152,146 @@ class NhanKhauService:
             print(f"SQLAlchemyError at delete_nhankhau: {str(e)}")
             db.session.rollback()
             return False
+        
+class LichSuHoKhauService:
+    @staticmethod
+    def create_lichsuhokhau(loaiThayDoi, maHoKhau, maNhanKhau, thoiGian, noiDung):
+        try:
+            # Nếu loại thay đổi là xóa thì mã nhân khẩu để bằng 0
+            if loaiThayDoi.lower() == "xóa":
+                maNhanKhau = 0
+                
+            new_lichsuhokhau = LichSuHoKhau(
+                loaiThayDoi=loaiThayDoi,
+                maHoKhau=maHoKhau,
+                maNhanKhau=maNhanKhau,
+                thoiGian=thoiGian,
+                noiDung=noiDung
+            )
+            
+            db.session.add(new_lichsuhokhau)
+            db.session.commit()
+            return new_lichsuhokhau
+        except SQLAlchemyError as e:
+            print(f"SQLAlchemyError at create_lichsuhokhau: {str(e)}")
+            db.session.rollback()
+            return None
+    
+    @staticmethod
+    def get_lichsuhokhau_by_id(id):
+        return LichSuHoKhau.query.get(id)
+    
+    @staticmethod
+    def get_all_lichsuhokhau():
+        return LichSuHoKhau.query.all()
+    
+    @staticmethod
+    def get_lichsuhokhau_by_hokhau(maHoKhau):
+        return LichSuHoKhau.query.filter_by(maHoKhau=maHoKhau).all()
+    
+    @staticmethod
+    def get_lichsuhokhau_by_nhankhau(maNhanKhau):
+        return LichSuHoKhau.query.filter_by(maNhanKhau=maNhanKhau).all()
+    
+    @staticmethod
+    def get_lichsuhokhau_by_type(loaiThayDoi):
+        return LichSuHoKhau.query.filter_by(loaiThayDoi=loaiThayDoi).all()
+
+class TamTruTamVangService:
+    @staticmethod
+    def create_tamtrutamvang(loai, maNhanKhau, ngayBatDau=None, ngayKetThuc=None, lyDo=None):
+        try:
+            new_tamtrutamvang = TamTruTamVang(
+                loai=loai,
+                maNhanKhau=maNhanKhau,
+                ngayBatDau=ngayBatDau,
+                ngayKetThuc=ngayKetThuc,
+                lyDo=lyDo
+            )
+            
+            db.session.add(new_tamtrutamvang)
+            db.session.commit()
+            return new_tamtrutamvang
+        except SQLAlchemyError as e:
+            print(f"SQLAlchemyError at create_tamtrutamvang: {str(e)}")
+            db.session.rollback()
+            return None
+    
+    @staticmethod
+    def get_tamtrutamvang_by_id(id):
+        return TamTruTamVang.query.get(id)
+    
+    @staticmethod
+    def get_all_tamtrutamvang():
+        return TamTruTamVang.query.all()
+    
+    @staticmethod
+    def get_tamtrutamvang_by_nhankhau(maNhanKhau):
+        return TamTruTamVang.query.filter_by(maNhanKhau=maNhanKhau).all()
+    
+    @staticmethod
+    def get_tamtrutamvang_by_type(loai):
+        return TamTruTamVang.query.filter_by(loai=loai).all()
+    
+    @staticmethod
+    def get_active_tamtrutamvang(current_date=None):
+        if current_date is None:
+            current_date = datetime.now().date()
+        return TamTruTamVang.query.filter(
+            TamTruTamVang.ngayBatDau <= current_date,
+            TamTruTamVang.ngayKetThuc >= current_date
+        ).all()
+    @staticmethod
+    def get_all_tamtrutamvang_with_nhankhau():
+        return db.session.query(
+            TamTruTamVang.id,
+            TamTruTamVang.loai,
+            TamTruTamVang.maNhanKhau,
+            TamTruTamVang.ngayBatDau,
+            TamTruTamVang.ngayKetThuc,
+            TamTruTamVang.lyDo,
+            NhanKhau.hoTen,
+            NhanKhau.qhVoiChuHo,
+            NhanKhau.maHoKhau,
+            NhanKhau.ngaySinh,
+            NhanKhau.gioiTinh,
+            NhanKhau.quocTich,
+            NhanKhau.noiSinh,
+            NhanKhau.cmnd
+        ).join(NhanKhau, TamTruTamVang.maNhanKhau == NhanKhau.maNhanKhau).all()
+    
+    @staticmethod
+    def update_tamtrutamvang(id, loai, ngayBatDau, ngayKetThuc, lyDo):
+        try:
+            tamtrutamvang = TamTruTamVang.query.get(id)
+            if not tamtrutamvang:
+                return False
+            
+            tamtrutamvang.loai = loai or tamtrutamvang.loai
+            tamtrutamvang.ngayBatDau = ngayBatDau or tamtrutamvang.ngayBatDau
+            tamtrutamvang.ngayKetThuc = ngayKetThuc or tamtrutamvang.ngayKetThuc
+            tamtrutamvang.lyDo = lyDo or tamtrutamvang.lyDo
+            
+            db.session.commit()
+            return True
+        except SQLAlchemyError as e:
+            print(f"SQLAlchemyError at update_tamtrutamvang: {str(e)}")
+            db.session.rollback()
+            return False
+    
+    @staticmethod
+    def delete_tamtrutamvang(id):
+        try:
+            tamtrutamvang = TamTruTamVang.query.get(id)
+            if not tamtrutamvang:
+                return False
+            
+            db.session.delete(tamtrutamvang)
+            db.session.commit()
+            return True
+        except SQLAlchemyError as e:
+            print(f"SQLAlchemyError at delete_tamtrutamvang: {str(e)}")
+            db.session.rollback()
+            return False
+        
+    
