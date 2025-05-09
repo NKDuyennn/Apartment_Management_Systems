@@ -43,13 +43,13 @@
                         </li>
                         <li>
                             <a href="{{ url_for('hk.lichsuhokhau') }}" class="menu-item {% if request.endpoint == 'hk.lichsuhokhau' %}active{% endif %}">
-                                <i class="fas fa-house"></i>
+                                <i class="fas fa-history"></i>
                                 <span>Lịch sử</span>
                             </a>
                         </li>
                         <li>
                             <a href="{{ url_for('hk.tamtrutamvang') }}" class="menu-item {% if request.endpoint == 'hk.tamtrutamvang' %}active{% endif %}">
-                                <i class="fas fa-house"></i>
+                                <i class="fas fa-user-clock"></i>
                                 <span>Tạm trú/vắng</span>
                             </a>
                         </li>
@@ -57,9 +57,21 @@
                     {% elif current_user.vaiTro == 'Tổ phó' %}
                         <!-- Tổ phó -->
                         <li>
-                            <a href="#" class="menu-item">
+                            <a href="{{ url_for('hk.hokhau') }}" class="menu-item {% if request.endpoint == 'hk.hokhau' %}active{% endif %}">
                                 <i class="fas fa-house"></i>
                                 <span>Hộ khẩu</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ url_for('hk.lichsuhokhau') }}" class="menu-item {% if request.endpoint == 'hk.lichsuhokhau' %}active{% endif %}">
+                                <i class="fas fa-history"></i>
+                                <span>Lịch sử</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ url_for('hk.tamtrutamvang') }}" class="menu-item {% if request.endpoint == 'hk.tamtrutamvang' %}active{% endif %}">
+                                <i class="fas fa-user-clock"></i>
+                                <span>Tạm trú/vắng</span>
                             </a>
                         </li>
 
