@@ -33,6 +33,7 @@
                     <th>Mã Hộ Khẩu</th>
                     <th>Chủ Hộ</th>
                     <th>Số nhà</th>
+                    <th>Diện tích</th>
                     <th>Ngày tạo</th>
                     <th>Ngày cập nhật</th>
                     <th class="action-column">Thao tác</th>
@@ -54,6 +55,7 @@
                         {% endif %}
                     </td>
                     <td>{{ hokhau.soNha }}</td>
+                    <td>{{ hokhau.dienTich }}</td>
                     <td>{{ hokhau.ngayLap }}</td>
                     <td>{{ hokhau.ngayCapNhat }}</td>
                     <td class="action-column">
@@ -88,10 +90,6 @@
         <span class="close" onclick="closeAddModal()">×</span>
         <h2>Thêm hộ khẩu mới</h2>
         <form id="addHoKhauForm">
-            <!-- <div class="form-group">
-                <label for="maHoKhau">Mã hộ khẩu</label>
-                <input type="text" class="form-control" id="maHoKhau" name="maHoKhau" required>
-            </div> -->
             <div class="form-group">
                 <label for="soNha">Số nhà</label>
                 <input type="text" class="form-control" id="soNha" name="soNha" required>
@@ -100,14 +98,24 @@
                 <label for="ngayLap">Ngày lập</label>
                 <input type="date" class="form-control" id="ngayLap_display" value="" disabled>
                 <input type="hidden" id="ngayLap" name="ngayLap">
-
             </div>
             <div class="form-group">
-                <label for="ngayLap">Ngày Cập Nhật</label>
+                <label for="ngayCapNhat">Ngày cập nhật</label>
                 <input type="date" class="form-control" id="ngayCapNhat_display" value="" disabled>
                 <input type="hidden" id="ngayCapNhat" name="ngayCapNhat">
             </div>
-
+            <div class="form-group">
+                <label for="dienTich">Diện tích (m²)</label>
+                <input type="number" step="0.01" class="form-control" id="dienTich" name="dienTich" required>
+            </div>
+            <div class="form-group">
+                <label for="xeMay">Số xe máy</label>
+                <input type="number" min="0" class="form-control" id="xeMay" name="xeMay" value="0">
+            </div>
+            <div class="form-group">
+                <label for="oTo">Số ô tô</label>
+                <input type="number" min="0" class="form-control" id="oTo" name="oTo" value="0">
+            </div>
             <div class="form-group">
                 <label for="chuHo">Chủ hộ</label>
                 <!-- Hiển thị "BlueMoon" cho người dùng xem -->

@@ -36,9 +36,15 @@
                 <p><strong>Số nhà:</strong> {{ hokhau.soNha }}</p>
             </div>
             <div class="info-column">
+                <p><strong>Diện tích:</strong> {{ hokhau.dienTich }} m²</p>
+                <p><strong>Số xe máy:</strong> {{ hokhau.xeMay }}</p>
+                <p><strong>Số ô tô:</strong> {{ hokhau.oTo }}</p>
+            </div>
+            <div class="info-column">
                 <p><strong>Ngày lập:</strong> {{ hokhau.ngayLap }}</p>
                 <p><strong>Ngày cập nhật:</strong> {{ hokhau.ngayCapNhat }}</p>
             </div>
+            
             <div class="info-column text-right">
                 {% if current_user.vaiTro == 'admin' %}
                 <div class="action-buttons-vertical">
@@ -123,14 +129,13 @@
     </div>
 </div>
 
-
 <!-- Edit Modal -->
 {% if current_user.vaiTro == 'admin' %}
 <div id="editHoKhauModal" class="modal">
     <div class="modal-content">
         <span class="close" onclick="closeHoKhauEditModal()">×</span>
         <h2>Chỉnh sửa thông tin hộ khẩu</h2>
-        <form id="editHoKhauForm" >
+        <form id="editHoKhauForm">
             <input type="hidden" id="editMaHoKhau" name="maHoKhau" value="{{ hokhau.maHoKhau }}">
             <div class="form-group">
                 <label for="editSoNha">Số nhà</label>
@@ -141,13 +146,23 @@
                 <input type="date" class="form-control" id="ngayLap_display" value="{{ hokhau.ngayLap.strftime('%Y-%m-%d') }}" disabled>
                 <input type="hidden" id="ngayLap" name="ngayLap" value="{{ hokhau.ngayLap.strftime('%Y-%m-%d') }}">
             </div>
-
             <div class="form-group">
                 <label for="ngayCapNhat_display">Ngày cập nhật</label>
                 <input type="date" class="form-control" id="ngayCapNhat_display" value="" disabled>
                 <input type="hidden" id="ngayCapNhat" name="ngayCapNhat">
             </div>
-            
+            <div class="form-group">
+                <label for="editDienTich">Diện tích (m²)</label>
+                <input type="number" step="0.01" class="form-control" id="editDienTich" name="dienTich" value="{{ hokhau.dienTich }}" required>
+            </div>
+            <div class="form-group">
+                <label for="editXeMay">Số xe máy</label>
+                <input type="number" min="0" class="form-control" id="editXeMay" name="xeMay" value="{{ hokhau.xeMay }}">
+            </div>
+            <div class="form-group">
+                <label for="editOTo">Số ô tô</label>
+                <input type="number" min="0" class="form-control" id="editOTo" name="oTo" value="{{ hokhau.oTo }}">
+            </div>
             <div class="form-group">
                 <label for="editChuHo">Chủ hộ</label>
                 <select class="form-control" id="editChuHo" name="chuHo" required>
@@ -161,7 +176,6 @@
                     {% endfor %}
                 </select>
             </div>
-
             <button type="submit" class="btn-submit">Lưu thay đổi</button>
         </form>
     </div>
@@ -230,8 +244,6 @@
                 <label for="trangThai">Trạng thái</label>
                 <select class="form-control" id="trangThai" name="trangThai" required>
                     <option value="Thường trú">Thường trú</option>
-                    <option value="Tạm trú">Tạm trú</option>
-                    <option value="Tạm vắng">Tạm vắng</option>
                 </select>
             </div>
             
@@ -318,7 +330,7 @@
             </div>
             <div class="form-group">
                 <label for="editQuanHeChuHo">Quan hệ với chủ hộ</label>
-                <select class="form-control" id="editQuanHeChuHo" name="editQuanHeChuHo">
+                <select class="form-control" id="editQuanHeChuHo" name="quanHeChuHo">
                     <option value="">-- Chọn quan hệ --</option>
                     <option value="Chủ hộ">Chủ hộ</option>
                     <option value="Vợ">Vợ</option>
