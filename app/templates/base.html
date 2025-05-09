@@ -78,7 +78,7 @@
                     {% elif current_user.vaiTro == 'Kế toán' %}
                         <!-- Kế toán -->
                         <li>
-                            <a href="#" class="menu-item">
+                            <a href="{{ url_for('tp.khoanthu') }}" class="menu-item {% if request.endpoint == 'tp.khoanthu' %}active{% endif %}">
                                 <i class="fas fa-money-bill-wave"></i>
                                 <span>Khoản phí</span>
                             </a>
