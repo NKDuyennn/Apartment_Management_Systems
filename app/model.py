@@ -2,8 +2,9 @@ from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
 from app.extension import db
+from flask_login import UserMixin
 
-class TaiKhoan(db.Model):
+class TaiKhoan(db.Model, UserMixin):
     __tablename__ = 'taikhoan'
 
     id = db.Column(db.Integer, primary_key=True)
@@ -122,18 +123,20 @@ class HoKhau(db.Model):
     
     maHoKhau = db.Column(db.Integer, primary_key=True)
     chuHo = db.Column(db.Integer, nullable=False)
-    diaChi = db.Column(db.String(255), nullable=False)
+    soNha = db.Column(db.String(25), nullable=False)
     ngayLap = db.Column(db.Date)
-    
+    ngayCapNhat = db.Column(db.Date)
+
     # Relationships
     lichsuhokhau = db.relationship('LichSuHoKhau', backref='hokhau', lazy=True)
     nhankhau = db.relationship('NhanKhau', backref='hokhau', lazy=True)
     
-    def __init__(self, chuHo, diaChi, ngayLap):
+    def __init__(self, chuHo, soNha, ngayLap, ngayCapNhat):
         self.chuHo = chuHo
-        self.diaChi = diaChi
+        self.soNha = soNha
         self.ngayLap = ngayLap
-    
+        self.ngayCapNhat = ngayCapNhat
+
     def __repr__(self):
         return f'<HoKhau {self.maHoKhau}>'
 
@@ -145,6 +148,11 @@ class NhanKhau(db.Model):
     hoTen = db.Column(db.String(100), nullable=False)
     ngaySinh = db.Column(db.Date)
     gioiTinh = db.Column(db.String(10))
+    quocTich = db.Column(db.String(100))
+    noiSinh = db.Column(db.String(100))
+    cmnd = db.Column(db.String(25))
+    qhVoiChuHo = db.Column(db.String(50))
+    trangThai = db.Column(db.String(50))        # 'Thường trú', 'Tạm trú', 'Tạm vắng'
     maHoKhau = db.Column(db.Integer, db.ForeignKey('hokhau.maHoKhau'))
     
     # Relationships
@@ -165,22 +173,21 @@ class LichSuHoKhau(db.Model):
     __tablename__ = 'lichsuhokhau'
     
     id = db.Column(db.Integer, primary_key=True)
-    loaiThayDoi = db.Column(db.String(45))
+    loaiThayDoi = db.Column(db.String(45))          # Thêm, sửa, xóa
     thoiGian = db.Column(db.DateTime)
+    noiDung = db.Column(db.String(1000))         
     maHoKhau = db.Column(db.Integer, db.ForeignKey('hokhau.maHoKhau'))
     maNhanKhau = db.Column(db.Integer, db.ForeignKey('nhankhau.maNhanKhau'))
     
-    def __init__(self, loaiThayDoi, maHoKhau, maNhanKhau, thoiGian):
+    def __init__(self, loaiThayDoi, maHoKhau, maNhanKhau, thoiGian, noiDung):
         self.loaiThayDoi = loaiThayDoi
         self.maHoKhau = maHoKhau
         self.maNhanKhau = maNhanKhau
+        self.noiDung = noiDung
         self.thoiGian = thoiGian if thoiGian else datetime.now()
     
     def __repr__(self):
         return f'<LichSuHoKhau {self.id}>'
-
-
-
 
 
 class TamTruTamVang(db.Model):

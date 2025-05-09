@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block title %}Trang chủ - BlueMoon Apartment{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="/static/css/home.css">
+{% endblock %}
+{% block content %}
+<h1>Trang chủ</h1>
+
+{% if current_user.vaiTro == 'admin' %}
+    <div class="dashboard-grid">
+        <div class="card">
+            <h3>Tài khoản</h3>
+            <p>Tổ trưởng: 3</p>
+            <p>Tổ phó: 5</p>
+            <p>Kế toán: 2</p>
+        </div>
+
+        <div class="card">
+            <h3>Hộ khẩu</h3>
+            <p>Tổng số hộ khẩu: 120</p>
+        </div>
+
+        <div class="card">
+            <h3>Nhân khẩu</h3>
+            <p>Tổng số nhân khẩu: 450</p>
+        </div>
+    </div>
+
+{% elif current_user.vaiTro == 'Tổ phó' %}
+    <div class="dashboard-grid">
+        <div class="card">
+            <h3>Hộ khẩu</h3>
+            <p>Tổng số hộ khẩu: 120</p>
+        </div>
+
+        <div class="card">
+            <h3>Nhân khẩu</h3>
+            <p>Tổng số nhân khẩu: 450</p>
+        </div>
+    </div>
+
+{% elif current_user.vaiTro == 'Kế toán' %}
+    <div class="dashboard-grid">
+        <div class="card">
+            <h3>Khoản thu</h3>
+            <p>Loại bắt buộc: 4</p>
+            <p>Loại đóng góp: 2</p>
+        </div>
+
+        <div class="card">
+            <h3>Đợt thu theo tháng</h3>
+            <ul>
+                <li>2025-01: 2 đợt</li>
+                <li>2025-02: 3 đợt</li>
+                <li>2025-03: 1 đợt</li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <h3>Số tiền thu theo tháng</h3>
+            <ul>
+                <li>2025-01: 25.000.000 VND</li>
+                <li>2025-02: 30.000.000 VND</li>
+                <li>2025-03: 15.000.000 VND</li>
+            </ul>
+        </div>
+    </div>
+{% endif %}
+{% endblock %}
