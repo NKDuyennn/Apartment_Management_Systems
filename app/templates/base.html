@@ -80,11 +80,11 @@
                         <li>
                             <a href="{{ url_for('tp.khoanthu') }}" class="menu-item {% if request.endpoint == 'tp.khoanthu' %}active{% endif %}">
                                 <i class="fas fa-money-bill-wave"></i>
-                                <span>Khoản phí</span>
+                                <span>Khoản thu</span>
                             </a>
                         </li>
                         <li>
-                            <a href="#" class="menu-item">
+                            <a href="{{ url_for('tp.dotthu') }}" class="menu-item {% if request.endpoint == 'tp.khoanthu' %}active{% endif %}">
                                 <i class="fas fa-calendar-check"></i>
                                 <span>Đợt thu</span>
                             </a>

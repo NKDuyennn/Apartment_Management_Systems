@@ -5,13 +5,14 @@ from sqlalchemy.exc import SQLAlchemyError
 
 class KhoanThuService:
     @staticmethod
-    def create_khoanthu(tenKhoanThu, loaiKhoanThu, soTien, loaiSoTien, idNguoiTao):
+    def create_khoanthu(tenKhoanThu, loaiKhoanThu, soTien, loaiSoTien, ghiChu, idNguoiTao):
         try:
             new_khoanthu = KhoanThu(
                 tenKhoanThu=tenKhoanThu,
                 loaiKhoanThu=loaiKhoanThu,
                 soTien=soTien,
                 loaiSoTien=loaiSoTien,
+                ghiChu=ghiChu,
                 idNguoiTao=idNguoiTao
             )
             db.session.add(new_khoanthu)
@@ -39,7 +40,7 @@ class KhoanThuService:
         return KhoanThu.query.filter_by(idNguoiTao=idNguoiTao).all()
 
     @staticmethod
-    def update_khoanthu(maKhoanThu, tenKhoanThu=None, loaiKhoanThu=None, soTien=None, loaiSoTien=None):
+    def update_khoanthu(maKhoanThu, tenKhoanThu=None, loaiKhoanThu=None, soTien=None, loaiSoTien=None, ghiChu=None):
         try:
             khoanthu = KhoanThu.query.get(maKhoanThu)
             if not khoanthu:
@@ -49,6 +50,7 @@ class KhoanThuService:
             khoanthu.loaiKhoanThu = loaiKhoanThu or khoanthu.loaiKhoanThu
             khoanthu.soTien = soTien if soTien is not None else khoanthu.soTien
             khoanthu.loaiSoTien = loaiSoTien or khoanthu.loaiSoTien
+            khoanthu.ghiChu = ghiChu or khoanthu.ghiChu
             
             db.session.commit()
             return True
@@ -76,6 +78,9 @@ class DotThuService:
     @staticmethod
     def create_dotthu(tenDotThu, ngayBatDau, ngayKetThuc, trangThai="Đang thực hiện"):
         try:
+            if DotThu.query.filter_by(tenDotThu=tenDotThu).first():
+                return None
+                
             new_dotthu = DotThu(
                 tenDotThu=tenDotThu,
                 ngayBatDau=ngayBatDau,
@@ -85,64 +90,76 @@ class DotThuService:
             db.session.add(new_dotthu)
             db.session.commit()
             return new_dotthu
+            
         except SQLAlchemyError as e:
-            print(f"SQLAlchemyError at create_dotthu: {str(e)}")
+            print(f"SQLAlchemyError at commit: {str(e)}")
             db.session.rollback()
             return None
-
+    
+    @staticmethod
+    def get_dotthu_by_name(tenDotThu):
+        return DotThu.query.filter_by(tenDotThu=tenDotThu).first()
+    
     @staticmethod
     def get_dotthu_by_id(maDotThu):
         return DotThu.query.get(maDotThu)
-
+        
     @staticmethod
     def get_all_dotthus():
         return DotThu.query.all()
-    
+        
     @staticmethod
-    def get_dotthus_by_status(trangThai):
-        return DotThu.query.filter_by(trangThai=trangThai).all()
-    
-    @staticmethod
-    def get_active_dotthus(current_date=None):
-        if current_date is None:
-            current_date = datetime.now().date()
-        return DotThu.query.filter(
-            DotThu.ngayBatDau <= current_date,
-            DotThu.ngayKetThuc >= current_date,
-            DotThu.trangThai == "Đang thực hiện"
-        ).all()
-
-    @staticmethod
-    def update_dotthu(maDotThu, tenDotThu=None, ngayBatDau=None, ngayKetThuc=None, trangThai=None):
+    def update_dotthu(maDotThu, tenDotThu, ngayBatDau, ngayKetThuc, trangThai):
         try:
             dotthu = DotThu.query.get(maDotThu)
             if not dotthu:
                 return False
-            
-            dotthu.tenDotThu = tenDotThu or dotthu.tenDotThu
-            dotthu.ngayBatDau = ngayBatDau or dotthu.ngayBatDau
-            dotthu.ngayKetThuc = ngayKetThuc or dotthu.ngayKetThuc
-            dotthu.trangThai = trangThai or dotthu.trangThai
+                
+            dotthu.tenDotThu = tenDotThu
+            dotthu.ngayBatDau = ngayBatDau
+            dotthu.ngayKetThuc = ngayKetThuc
+            dotthu.trangThai = trangThai
             
             db.session.commit()
             return True
-        except SQLAlchemyError as e:
-            print(f"SQLAlchemyError at update_dotthu: {str(e)}")
+        except SQLAlchemyError:
             db.session.rollback()
             return False
-
+    
     @staticmethod
     def delete_dotthu(maDotThu):
         try:
             dotthu = DotThu.query.get(maDotThu)
             if not dotthu:
                 return False
-            
+                
             db.session.delete(dotthu)
             db.session.commit()
             return True
-        except SQLAlchemyError as e:
-            print(f"SQLAlchemyError at delete_dotthu: {str(e)}")
+        except SQLAlchemyError:
+            db.session.rollback()
+            return False
+    
+    @staticmethod
+    def get_active_dotthus():
+        return DotThu.query.filter_by(trangThai="Đang thực hiện").all()
+    
+    @staticmethod
+    def get_dotthus_by_status(trangThai):
+        return DotThu.query.filter_by(trangThai=trangThai).all()
+    
+    @staticmethod
+    def update_status(maDotThu, trangThai):
+        try:
+            dotthu = DotThu.query.get(maDotThu)
+            if not dotthu:
+                return False
+                
+            dotthu.trangThai = trangThai
+            
+            db.session.commit()
+            return True
+        except SQLAlchemyError:
             db.session.rollback()
             return False
 

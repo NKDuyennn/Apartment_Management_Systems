@@ -37,19 +37,22 @@ class KhoanThu(db.Model):
     
     maKhoanThu = db.Column(db.Integer, primary_key=True)
     tenKhoanThu = db.Column(db.String(100), nullable=False)
-    loaiKhoanThu = db.Column(db.String(50))
+    loaiKhoanThu = db.Column(db.String(50))     # Bắt buộc, đóng góp
     soTien = db.Column(db.Float)
-    loaiSoTien = db.Column(db.String(50))  # "Tiền mặt" or "Chuyển khoản"
+    loaiSoTien = db.Column(db.String(50))  # "VNĐ"
+    ghiChu = db.Column(db.String(1000))     # "/m2"
     idNguoiTao = db.Column(db.Integer, db.ForeignKey('taikhoan.id'))
     
     # Relationships
+    nguoiTao = db.relationship("TaiKhoan", backref="cacKhoanThu")
     khoanthu_has_dotthus = db.relationship('KhoanThu_Has_DotThu', backref='khoanthu', lazy=True)
     
-    def __init__(self, tenKhoanThu, loaiKhoanThu, soTien, loaiSoTien, idNguoiTao):
+    def __init__(self, tenKhoanThu, loaiKhoanThu, soTien, loaiSoTien, ghiChu, idNguoiTao):
         self.tenKhoanThu = tenKhoanThu
         self.loaiKhoanThu = loaiKhoanThu
         self.soTien = soTien
         self.loaiSoTien = loaiSoTien
+        self.ghiChu = ghiChu
         self.idNguoiTao = idNguoiTao
     
     def __repr__(self):
