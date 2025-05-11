@@ -37,7 +37,7 @@ class KhoanThu(db.Model):
     
     maKhoanThu = db.Column(db.Integer, primary_key=True)
     tenKhoanThu = db.Column(db.String(100), nullable=False)
-    loaiKhoanThu = db.Column(db.String(50))     # Bắt buộc, đóng góp
+    loaiKhoanThu = db.Column(db.String(50))     # "Phí dịch vụ", "Phí quản lý", "Phí xe máy", "Phí ô tô", "Khác", "Đóng góp"
     soTien = db.Column(db.Float)
     loaiSoTien = db.Column(db.String(50))  # "VNĐ"
     ghiChu = db.Column(db.String(1000))     # "/m2"
@@ -102,15 +102,19 @@ class NopPhi(db.Model):
     __tablename__ = 'nopphi'
     
     IDNopTien = db.Column(db.Integer, primary_key=True)
-    ngayThu = db.Column(db.Date)
-    soTien = db.Column(db.Float)
-    nguoiNop = db.Column(db.String(100))
-    idNguoiThu = db.Column(db.Integer, db.ForeignKey('taikhoan.id'))
-    maHoKhau = db.Column(db.Integer, db.ForeignKey('hokhau.maHoKhau'))
-    idKhoanThuDotThu = db.Column(db.Integer, db.ForeignKey('khoanthu_has_dotthu.idKhoanThuDotThu'))
+    ngayThu = db.Column(db.Date, nullable=True)
+    soTienDaNop = db.Column(db.Float, nullable=False, default=0.0)
+    soTienCanNop = db.Column(db.Float, nullable=False, default=0.0)
+    nguoiNop = db.Column(db.String(100), nullable=True)
+    idNguoiThu = db.Column(db.Integer, db.ForeignKey('taikhoan.id'), nullable=True)
+    maHoKhau = db.Column(db.Integer, db.ForeignKey('hokhau.maHoKhau'), nullable=False)
+    idKhoanThuDotThu = db.Column(db.Integer, db.ForeignKey('khoanthu_has_dotthu.idKhoanThuDotThu'), nullable=False)
     
-    def __init__(self, soTien, nguoiNop, idKhoanThuDotThu, maHoKhau, idNguoiThu, ngayThu):
-        self.soTien = soTien
+    # Relationships (tùy chọn, để dễ truy vấn)
+
+    def __init__(self, soTienDaNop, soTienCanNop, nguoiNop, idKhoanThuDotThu, maHoKhau, idNguoiThu, ngayThu=None):
+        self.soTienDaNop = soTienDaNop
+        self.soTienCanNop = soTienCanNop
         self.nguoiNop = nguoiNop
         self.idKhoanThuDotThu = idKhoanThuDotThu
         self.maHoKhau = maHoKhau

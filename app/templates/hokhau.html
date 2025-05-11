@@ -18,12 +18,12 @@
         {% endif %}
     {% endwith %}
 
-    
+    {% if current_user.vaiTro == 'admin' %}
     <div class="search-container">
         <input type="text" id="searchInput" class="search-box" placeholder="Tìm kiếm ...">
         <button class="add-button" onclick="openAddModal()">+ Thêm hộ khẩu</button>
     </div>
-
+    {% endif %}
 
     <!-- Phần bảng dữ liệu -->
     <div class="card">

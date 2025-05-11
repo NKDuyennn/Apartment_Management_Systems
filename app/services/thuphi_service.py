@@ -167,13 +167,11 @@ class KhoanThuHasDotThuService:
     @staticmethod
     def create_khoanthu_has_dotthu(maKhoanThu, maDotThu):
         try:
-            # Kiểm tra khoản thu và đợt thu tồn tại
             khoanthu = KhoanThu.query.get(maKhoanThu)
             dotthu = DotThu.query.get(maDotThu)
             if not khoanthu or not dotthu:
                 return None
             
-            # Kiểm tra xem đã tồn tại mapping này chưa
             existing = KhoanThu_Has_DotThu.query.filter_by(
                 maKhoanThu=maKhoanThu, 
                 maDotThu=maDotThu
@@ -246,20 +244,112 @@ class KhoanThuHasDotThuService:
 
 class NopPhiService:
     @staticmethod
-    def create_nopphi(soTien, nguoiNop, idKhoanThuDotThu, maHoKhau, idNguoiThu, ngayThu=None):
+    def calculate_so_tien_can_nop(khoanthu, hokhau):
+        """Tính số tiền cần nộp dựa trên loại khoản thu và thông tin hộ khẩu"""
+        dien_tich = hokhau.dienTich or 0
+        xe_may = hokhau.xeMay or 0
+        o_to = hokhau.oTo or 0
+        
+        if khoanthu.loaiKhoanThu in ["Phí dịch vụ", "Phí quản lý"]:
+            return khoanthu.soTien * max(dien_tich, 0)
+        elif khoanthu.loaiKhoanThu == "Phí xe máy":
+            return khoanthu.soTien * max(xe_may, 0)
+        elif khoanthu.loaiKhoanThu == "Phí ô tô":
+            return khoanthu.soTien * max(o_to, 0)
+        elif khoanthu.loaiKhoanThu == "Đóng góp":
+            return 0
+        else:  # "Khác"
+            return 0
+
+    @staticmethod
+    def create_nopphi_for_hokhau(maHoKhau, idKhoanThuDotThu, nguoiNop, idNguoiThu):
         try:
-            # Kiểm tra khoản thu đợt thu tồn tại
             khoanthu_has_dotthu = KhoanThu_Has_DotThu.query.get(idKhoanThuDotThu)
             if not khoanthu_has_dotthu:
                 return None
             
+            hokhau = HoKhau.query.get(maHoKhau)
+            if not hokhau:
+                return None
+            
+            khoanthu = KhoanThu.query.get(khoanthu_has_dotthu.maKhoanThu)
+            so_tien_can_nop = NopPhiService.calculate_so_tien_can_nop(khoanthu, hokhau)
+            
+            existing_nopphi = NopPhi.query.filter_by(
+                idKhoanThuDotThu=idKhoanThuDotThu,
+                maHoKhau=maHoKhau
+            ).first()
+            if existing_nopphi:
+                return existing_nopphi
+            
             new_nopphi = NopPhi(
-                soTien=soTien,
+                soTienCanNop=so_tien_can_nop,
+                soTienDaNop=0,
                 nguoiNop=nguoiNop,
                 idKhoanThuDotThu=idKhoanThuDotThu,
                 maHoKhau=maHoKhau,
                 idNguoiThu=idNguoiThu,
-                ngayThu=ngayThu
+                ngayThu=None
+            )
+            db.session.add(new_nopphi)
+            db.session.commit()
+            return new_nopphi
+        except SQLAlchemyError as e:
+            print(f"SQLAlchemyError at create_nopphi_for_hokhau: {str(e)}")
+            db.session.rollback()
+            return None
+
+    @staticmethod
+    def create_multiple_nopphi_for_hokhau(maHoKhau, maDotThu, nguoiNop, idNguoiThu):
+        """Tạo bản ghi nộp phí cho một hộ khẩu với tất cả khoản thu trong đợt thu"""
+        try:
+            khoanthu_dotthus = KhoanThuHasDotThuService.get_by_dotthu(maDotThu)
+            if not khoanthu_dotthus:
+                return []
+            
+            hokhau = HoKhau.query.get(maHoKhau)
+            if not hokhau:
+                return []
+            
+            created_nopphis = []
+            for kt_dt in khoanthu_dotthus:
+                nopphi = NopPhiService.create_nopphi_for_hokhau(
+                    maHoKhau=maHoKhau,
+                    idKhoanThuDotThu=kt_dt.idKhoanThuDotThu,
+                    nguoiNop=nguoiNop,
+                    idNguoiThu=idNguoiThu
+                )
+                if nopphi:
+                    created_nopphis.append(nopphi)
+            
+            return created_nopphis
+        except SQLAlchemyError as e:
+            print(f"SQLAlchemyError at create_multiple_nopphi_for_hokhau: {str(e)}")
+            db.session.rollback()
+            return []
+
+    @staticmethod
+    def create_nopphi(soTienDaNop, nguoiNop, idKhoanThuDotThu, maHoKhau, idNguoiThu, ngayThu=None):
+        try:
+            khoanthu_has_dotthu = KhoanThu_Has_DotThu.query.get(idKhoanThuDotThu)
+            if not khoanthu_has_dotthu:
+                return None
+            
+            hokhau = HoKhau.query.get(maHoKhau)
+            if not hokhau:
+                return None
+            
+            khoanthu = KhoanThu.query.get(khoanthu_has_dotthu.maKhoanThu)
+            so_tien_can_nop = NopPhiService.calculate_so_tien_can_nop(khoanthu, hokhau)
+            
+            new_nopphi = NopPhi(
+                soTienDaNop=soTienDaNop,
+                soTienCanNop=so_tien_can_nop,
+                nguoiNop=nguoiNop,
+                idKhoanThuDotThu=idKhoanThuDotThu,
+                maHoKhau=maHoKhau,
+                idNguoiThu=idNguoiThu,
+                ngayThu=ngayThu if ngayThu else datetime.now().date()
             )
             db.session.add(new_nopphi)
             db.session.commit()
@@ -297,15 +387,16 @@ class NopPhiService:
         ).all()
     
     @staticmethod
-    def get_nopphis_with_details():
-        return db.session.query(
+    def get_nopphis_with_details(maDotThu):
+        results = db.session.query(
             NopPhi.IDNopTien,
             NopPhi.ngayThu,
-            NopPhi.soTien,
+            NopPhi.soTienDaNop,
+            NopPhi.soTienCanNop,
             NopPhi.nguoiNop,
             NopPhi.idNguoiThu,
             NopPhi.maHoKhau,
-            KhoanThu.tenKhoanThu,
+            KhoanThu.maKhoanThu,  # Thay đổi từ tenKhoanThu thành maKhoanThu để khớp với giao diện
             KhoanThu.loaiKhoanThu,
             DotThu.tenDotThu
         ).join(
@@ -314,18 +405,42 @@ class NopPhiService:
             KhoanThu, KhoanThu_Has_DotThu.maKhoanThu == KhoanThu.maKhoanThu
         ).join(
             DotThu, KhoanThu_Has_DotThu.maDotThu == DotThu.maDotThu
+        ).filter(
+            KhoanThu_Has_DotThu.maDotThu == maDotThu
         ).all()
+        
+        # Tổ chức dữ liệu theo hộ khẩu
+        hokhau_data = {}
+        for row in results:
+            maHoKhau = row.maHoKhau
+            if maHoKhau not in hokhau_data:
+                hokhau_data[maHoKhau] = {
+                    'maHoKhau': maHoKhau,
+                    'khoanThus': {}
+                }
+            hokhau_data[maHoKhau]['khoanThus'][str(row.maKhoanThu)] = {  # Sử dụng maKhoanThu làm key
+                'IDNopTien': row.IDNopTien,
+                'soTienDaNop': row.soTienDaNop,
+                'soTienCanNop': row.soTienCanNop,
+                'ngayThu': row.ngayThu,
+                'nguoiNop': row.nguoiNop
+            }
+        
+        return list(hokhau_data.values())
 
     @staticmethod
-    def update_nopphi(IDNopTien, soTien=None, nguoiNop=None, ngayThu=None):
+    def update_nopphi(IDNopTien, soTienDaNop=None, nguoiNop=None):
         try:
             nopphi = NopPhi.query.get(IDNopTien)
             if not nopphi:
                 return False
             
-            nopphi.soTien = soTien if soTien is not None else nopphi.soTien
-            nopphi.nguoiNop = nguoiNop or nopphi.nguoiNop
-            nopphi.ngayThu = ngayThu or nopphi.ngayThu
+            if soTienDaNop is not None:
+                nopphi.soTienDaNop = soTienDaNop
+                if soTienDaNop > 0 and not nopphi.ngayThu:
+                    nopphi.ngayThu = datetime.now().date()
+            if nguoiNop is not None:
+                nopphi.nguoiNop = nguoiNop
             
             db.session.commit()
             return True
@@ -351,8 +466,7 @@ class NopPhiService:
     
     @staticmethod
     def get_total_by_khoanthu(maKhoanThu):
-        """Tính tổng số tiền đã thu theo khoản thu"""
-        total = db.session.query(db.func.sum(NopPhi.soTien)).join(
+        total = db.session.query(db.func.sum(NopPhi.soTienDaNop)).join(
             KhoanThu_Has_DotThu, NopPhi.idKhoanThuDotThu == KhoanThu_Has_DotThu.idKhoanThuDotThu
         ).filter(
             KhoanThu_Has_DotThu.maKhoanThu == maKhoanThu
@@ -361,8 +475,7 @@ class NopPhiService:
     
     @staticmethod
     def get_total_by_dotthu(maDotThu):
-        """Tính tổng số tiền đã thu theo đợt thu"""
-        total = db.session.query(db.func.sum(NopPhi.soTien)).join(
+        total = db.session.query(db.func.sum(NopPhi.soTienDaNop)).join(
             KhoanThu_Has_DotThu, NopPhi.idKhoanThuDotThu == KhoanThu_Has_DotThu.idKhoanThuDotThu
         ).filter(
             KhoanThu_Has_DotThu.maDotThu == maDotThu
