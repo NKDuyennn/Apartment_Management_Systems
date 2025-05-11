@@ -5,18 +5,19 @@ from sqlalchemy.exc import SQLAlchemyError
 
 class HoKhauService:
     @staticmethod
-    def create_hokhau(chuHo, soNha, ngayLap, ngayCapNhat):
-        
+    def create_hokhau(chuHo, soNha, ngayLap, ngayCapNhat, dienTich, xeMay=0, oTo=0):
         try:
-
             if HoKhau.query.filter_by(soNha=soNha).first():
                 return None
             
             new_hokhau = HoKhau(
-                soNha=soNha,
                 chuHo=chuHo,
+                soNha=soNha,
                 ngayLap=ngayLap,
-                ngayCapNhat=ngayCapNhat
+                ngayCapNhat=ngayCapNhat,
+                dienTich=dienTich,
+                xeMay=xeMay,
+                oTo=oTo
             )
             db.session.add(new_hokhau)
             db.session.commit()
@@ -29,22 +30,18 @@ class HoKhauService:
 
     @staticmethod
     def get_hokhau_by_soNha(soNha):
-        
         return HoKhau.query.filter_by(soNha=soNha).first()
 
     @staticmethod
     def get_hokhau_by_id(id):
-        
         return HoKhau.query.get(id)
     
     @staticmethod
     def get_all_hokhaus():
-        
         return HoKhau.query.all()
     
     @staticmethod
-    def update_HoKhau(maHoKhau, chuHo, soNha, ngayLap, ngayCapNhat):
-        
+    def update_HoKhau(maHoKhau, chuHo, soNha, ngayLap, ngayCapNhat, dienTich, xeMay=0, oTo=0):
         try:
             hokhau = HoKhau.query.get(maHoKhau)
             if not hokhau:
@@ -54,6 +51,9 @@ class HoKhauService:
             hokhau.soNha = soNha
             hokhau.ngayLap = ngayLap
             hokhau.ngayCapNhat = ngayCapNhat
+            hokhau.dienTich = dienTich
+            hokhau.xeMay = xeMay
+            hokhau.oTo = oTo
 
             db.session.commit()
             return True
@@ -63,7 +63,6 @@ class HoKhauService:
 
     @staticmethod
     def delete_hokhau(maHoKhau):
-        
         try:
             hokhau = HoKhau.query.get(maHoKhau)
             if not hokhau:

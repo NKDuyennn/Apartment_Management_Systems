@@ -37,19 +37,22 @@ class KhoanThu(db.Model):
     
     maKhoanThu = db.Column(db.Integer, primary_key=True)
     tenKhoanThu = db.Column(db.String(100), nullable=False)
-    loaiKhoanThu = db.Column(db.String(50))
+    loaiKhoanThu = db.Column(db.String(50))     # "Phí dịch vụ", "Phí quản lý", "Phí xe máy", "Phí ô tô", "Khác", "Đóng góp"
     soTien = db.Column(db.Float)
-    loaiSoTien = db.Column(db.String(50))  # "Tiền mặt" or "Chuyển khoản"
+    loaiSoTien = db.Column(db.String(50))  # "VNĐ"
+    ghiChu = db.Column(db.String(1000))     # "/m2"
     idNguoiTao = db.Column(db.Integer, db.ForeignKey('taikhoan.id'))
     
     # Relationships
+    nguoiTao = db.relationship("TaiKhoan", backref="cacKhoanThu")
     khoanthu_has_dotthus = db.relationship('KhoanThu_Has_DotThu', backref='khoanthu', lazy=True)
     
-    def __init__(self, tenKhoanThu, loaiKhoanThu, soTien, loaiSoTien, idNguoiTao):
+    def __init__(self, tenKhoanThu, loaiKhoanThu, soTien, loaiSoTien, ghiChu, idNguoiTao):
         self.tenKhoanThu = tenKhoanThu
         self.loaiKhoanThu = loaiKhoanThu
         self.soTien = soTien
         self.loaiSoTien = loaiSoTien
+        self.ghiChu = ghiChu
         self.idNguoiTao = idNguoiTao
     
     def __repr__(self):
@@ -99,15 +102,19 @@ class NopPhi(db.Model):
     __tablename__ = 'nopphi'
     
     IDNopTien = db.Column(db.Integer, primary_key=True)
-    ngayThu = db.Column(db.Date)
-    soTien = db.Column(db.Float)
-    nguoiNop = db.Column(db.String(100))
-    idNguoiThu = db.Column(db.Integer, db.ForeignKey('taikhoan.id'))
-    maHoKhau = db.Column(db.Integer, db.ForeignKey('hokhau.maHoKhau'))
-    idKhoanThuDotThu = db.Column(db.Integer, db.ForeignKey('khoanthu_has_dotthu.idKhoanThuDotThu'))
+    ngayThu = db.Column(db.Date, nullable=True)
+    soTienDaNop = db.Column(db.Float, nullable=False, default=0.0)
+    soTienCanNop = db.Column(db.Float, nullable=False, default=0.0)
+    nguoiNop = db.Column(db.String(100), nullable=True)
+    idNguoiThu = db.Column(db.Integer, db.ForeignKey('taikhoan.id'), nullable=True)
+    maHoKhau = db.Column(db.Integer, db.ForeignKey('hokhau.maHoKhau'), nullable=False)
+    idKhoanThuDotThu = db.Column(db.Integer, db.ForeignKey('khoanthu_has_dotthu.idKhoanThuDotThu'), nullable=False)
     
-    def __init__(self, soTien, nguoiNop, idKhoanThuDotThu, maHoKhau, idNguoiThu, ngayThu):
-        self.soTien = soTien
+    # Relationships (tùy chọn, để dễ truy vấn)
+
+    def __init__(self, soTienDaNop, soTienCanNop, nguoiNop, idKhoanThuDotThu, maHoKhau, idNguoiThu, ngayThu=None):
+        self.soTienDaNop = soTienDaNop
+        self.soTienCanNop = soTienCanNop
         self.nguoiNop = nguoiNop
         self.idKhoanThuDotThu = idKhoanThuDotThu
         self.maHoKhau = maHoKhau
@@ -126,16 +133,22 @@ class HoKhau(db.Model):
     soNha = db.Column(db.String(25), nullable=False)
     ngayLap = db.Column(db.Date)
     ngayCapNhat = db.Column(db.Date)
+    dienTich = db.Column(db.Float, nullable=False)
+    xeMay = db.Column(db.Integer, default=0)
+    oTo = db.Column(db.Integer, default=0)
 
     # Relationships
     lichsuhokhau = db.relationship('LichSuHoKhau', backref='hokhau', lazy=True)
     nhankhau = db.relationship('NhanKhau', backref='hokhau', lazy=True)
     
-    def __init__(self, chuHo, soNha, ngayLap, ngayCapNhat):
+    def __init__(self, chuHo, soNha, ngayLap, ngayCapNhat, dienTich, xeMay=0, oTo=0):
         self.chuHo = chuHo
         self.soNha = soNha
         self.ngayLap = ngayLap
         self.ngayCapNhat = ngayCapNhat
+        self.dienTich = dienTich
+        self.xeMay = xeMay
+        self.oTo = oTo
 
     def __repr__(self):
         return f'<HoKhau {self.maHoKhau}>'
