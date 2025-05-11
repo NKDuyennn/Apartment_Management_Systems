@@ -1,13 +1,13 @@
 {% extends "base.html" %}
-{% block title %}Chi tiết hộ khẩu - Mã {{ hokhau.maHoKhau }}{% endblock %}
+{% block title %}Đợt thu - {{ dotthu.tenDotThu }}{% endblock %}
 {% block extra_css %}
-<link rel="stylesheet" href="/static/css/hokhau.css">
+<link rel="stylesheet" href="/static/css/dotthu.css">
 <link rel="stylesheet" href="/static/css/nhankhau.css">
 {% endblock %}
 
 {% block content %}
 <div class="container">
-    <h1>Chi tiết hộ khẩu - Mã {{ hokhau.maHoKhau }}</h1>
+    <h1>Đợt thu - {{ dotthu.tenDotThu }}</h1>
 
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
@@ -21,28 +21,22 @@
 
     <div class="card">
         <div class="card-header">
-            <h2>Thông tin hộ khẩu</h2>
+            <h2>Thông tin đợt thu</h2>
         </div>
         <div class="card-body info-grid">
             <div class="info-column">
-                <p><strong>Mã hộ khẩu:</strong> {{ hokhau.maHoKhau }}</p>
-                <p><strong>Chủ hộ:</strong> 
-                    {% if hokhau.chuHo == 0 %}
-                        BlueMoon
-                    {% else %}
-                        {{ chu_ho if chu_ho else 'Không xác định' }}
-                    {% endif %}
-                </p>
-                <p><strong>Số nhà:</strong> {{ hokhau.soNha }}</p>
+                <p><strong>Mã đợt thu:</strong> {{ dotthu.maDotThu }}</p>
+                <p><strong>Tên đợt thu:</strong> {{ dotthu.tenDotThu }}</p>
+                <p><strong>Ngày bắt đầu:</strong> {{ dotthu.ngayBatDau }}</p>
+                <p><strong>Ngày kết thúc:</strong> {{ dotthu.ngayKetThuc }}</p>
             </div>
             <div class="info-column">
-                <p><strong>Diện tích:</strong> {{ hokhau.dienTich }} m²</p>
-                <p><strong>Số xe máy:</strong> {{ hokhau.xeMay }}</p>
-                <p><strong>Số ô tô:</strong> {{ hokhau.oTo }}</p>
+                <p><strong>Khoản thu:</strong> {{  }} m²</p>
+
             </div>
             <div class="info-column">
-                <p><strong>Ngày lập:</strong> {{ hokhau.ngayLap }}</p>
-                <p><strong>Ngày cập nhật:</strong> {{ hokhau.ngayCapNhat }}</p>
+                <p><strong>Trạng thái:</strong> {{ dotthu.trangThai }}</p>
+                <p><strong>Số lượng hộ khẩu:</strong> {{  }}</p>
             </div>
             
             <div class="info-column text-right">
@@ -368,6 +362,6 @@
 {% endblock %}
 
 {% block extra_js %}
-<script src="{{ url_for('static', filename='js/hokhau.js') }}"></script>
+<script src="{{ url_for('static', filename='js/dotthu.js') }}"></script>
 <script src="{{ url_for('static', filename='js/nhankhau.js') }}"></script>
 {% endblock %}
