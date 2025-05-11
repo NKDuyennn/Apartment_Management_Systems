@@ -41,12 +41,7 @@
                                 <span>Hộ khẩu</span>
                             </a>
                         </li>
-                        <li>
-                            <a href="{{ url_for('hk.lichsuhokhau') }}" class="menu-item {% if request.endpoint == 'hk.lichsuhokhau' %}active{% endif %}">
-                                <i class="fas fa-history"></i>
-                                <span>Lịch sử</span>
-                            </a>
-                        </li>
+                        
                         <li>
                             <a href="{{ url_for('hk.tamtrutamvang') }}" class="menu-item {% if request.endpoint == 'hk.tamtrutamvang' %}active{% endif %}">
                                 <i class="fas fa-user-clock"></i>
@@ -54,6 +49,12 @@
                             </a>
                         </li>
 
+                        <li>
+                            <a href="{{ url_for('hk.lichsuhokhau') }}" class="menu-item {% if request.endpoint == 'hk.lichsuhokhau' %}active{% endif %}">
+                                <i class="fas fa-history"></i>
+                                <span>Lịch sử</span>
+                            </a>
+                        </li>
                     {% elif current_user.vaiTro == 'Tổ phó' %}
                         <!-- Tổ phó -->
                         <li>
@@ -63,28 +64,27 @@
                             </a>
                         </li>
                         <li>
-                            <a href="{{ url_for('hk.lichsuhokhau') }}" class="menu-item {% if request.endpoint == 'hk.lichsuhokhau' %}active{% endif %}">
-                                <i class="fas fa-history"></i>
-                                <span>Lịch sử</span>
-                            </a>
-                        </li>
-                        <li>
                             <a href="{{ url_for('hk.tamtrutamvang') }}" class="menu-item {% if request.endpoint == 'hk.tamtrutamvang' %}active{% endif %}">
                                 <i class="fas fa-user-clock"></i>
                                 <span>Tạm trú/vắng</span>
                             </a>
                         </li>
-
+                        <li>
+                            <a href="{{ url_for('hk.lichsuhokhau') }}" class="menu-item {% if request.endpoint == 'hk.lichsuhokhau' %}active{% endif %}">
+                                <i class="fas fa-history"></i>
+                                <span>Lịch sử</span>
+                            </a>
+                        </li>
                     {% elif current_user.vaiTro == 'Kế toán' %}
                         <!-- Kế toán -->
                         <li>
-                            <a href="#" class="menu-item">
+                            <a href="{{ url_for('tp.khoanthu') }}" class="menu-item {% if request.endpoint == 'tp.khoanthu' %}active{% endif %}">
                                 <i class="fas fa-money-bill-wave"></i>
-                                <span>Khoản phí</span>
+                                <span>Khoản thu</span>
                             </a>
                         </li>
                         <li>
-                            <a href="#" class="menu-item">
+                            <a href="{{ url_for('tp.dotthu') }}" class="menu-item {% if request.endpoint == 'tp.khoanthu' %}active{% endif %}">
                                 <i class="fas fa-calendar-check"></i>
                                 <span>Đợt thu</span>
                             </a>

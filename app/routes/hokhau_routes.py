@@ -22,22 +22,31 @@ def add_new_hokhau():
     soNha = data.get('soNha')
     ngayLap = data.get('ngayLap')
     ngayCapNhat = data.get('ngayCapNhat')
-    
-    
+    dienTich = data.get('dienTich')
+    xeMay = data.get('xeMay', 0)
+    oTo = data.get('oTo', 0)
     chuHo_val = data.get('chuHo')
     chuHo = int(chuHo_val) if chuHo_val else 0
     
     # Debug information
-    print(f"Form data received: soNha={soNha}, ngayLap={ngayLap}, ngayCapNhat={ngayCapNhat}, chuHo={chuHo}")
+    print(f"Form data received: soNha={soNha}, ngayLap={ngayLap}, ngayCapNhat={ngayCapNhat}, dienTich={dienTich}, xeMay={xeMay}, oTo={oTo}, chuHo={chuHo}")
 
     ngayCapNhat = datetime.strptime(ngayCapNhat, '%Y-%m-%d').date() if ngayCapNhat else datetime.now().date()
     ngayLap = datetime.strptime(ngayLap, '%Y-%m-%d').date() if ngayLap else datetime.now().date()
     
-    if not all([soNha, ngayLap, ngayCapNhat]):         
-        return jsonify({'success': False, 'message': 'Vui lòng điền đầy đủ thông tin'}), 400 
+    # Validate required fields
+    if not all([soNha, ngayLap, ngayCapNhat, dienTich]):
+        return jsonify({'success': False, 'message': 'Vui lòng điền đầy đủ thông tin (số nhà, ngày lập, ngày cập nhật, diện tích)'}), 400 
     
-    # Tạo tài khoản mới
-    new_hokhau = HoKhauService.create_hokhau(chuHo, soNha, ngayLap, ngayCapNhat)
+    try:
+        dienTich = float(dienTich)
+        xeMay = int(xeMay) if xeMay else 0
+        oTo = int(oTo) if oTo else 0
+    except ValueError:
+        return jsonify({'success': False, 'message': 'Diện tích, số xe máy, số ô tô phải là số hợp lệ'}), 400
+
+    # Create new household
+    new_hokhau = HoKhauService.create_hokhau(chuHo, soNha, ngayLap, ngayCapNhat, dienTich, xeMay, oTo)
     
     if new_hokhau:
         return jsonify({'success': True, 'message': 'Tạo hộ khẩu thành công'}), 201
@@ -58,25 +67,36 @@ def update_hokhau(maHoKhau):
     soNha = data.get('soNha')
     ngayLap_str = data.get('ngayLap')
     ngayCapNhat_str = data.get('ngayCapNhat')
+    dienTich = data.get('dienTich')
+    xeMay = data.get('xeMay', 0)
+    oTo = data.get('oTo', 0)
 
-    # Parse ngày lập và ngày cập nhật
+    # Parse dates
     try:
         ngayLap = datetime.strptime(ngayLap_str, '%Y-%m-%d').date()
         ngayCapNhat = datetime.strptime(ngayCapNhat_str, '%Y-%m-%d').date()
-    except Exception as e:
+    except Exception:
         return jsonify({'success': False, 'message': 'Ngày không hợp lệ'}), 400
 
-    if not all([soNha, ngayLap, ngayCapNhat]):
-        return jsonify({'success': False, 'message': 'Vui lòng điền đầy đủ thông tin'}), 400
+    # Validate required fields
+    if not all([soNha, ngayLap, ngayCapNhat, dienTich]):
+        return jsonify({'success': False, 'message': 'Vui lòng điền đầy đủ thông tin (số nhà, ngày lập, ngày cập nhật, diện tích)'}), 400
 
-    # Get current household to check if household head is changing
+    try:
+        dienTich = float(dienTich)
+        xeMay = int(xeMay) if xeMay else 0
+        oTo = int(oTo) if oTo else 0
+    except ValueError:
+        return jsonify({'success': False, 'message': 'Diện tích, số xe máy, số ô tô phải là số hợp lệ'}), 400
+
+    # Get current household
     current_hokhau = HoKhau.query.get(maHoKhau)
     if not current_hokhau:
         return jsonify({'success': False, 'message': 'Không tìm thấy hộ khẩu'}), 404
     
     old_chuho = current_hokhau.chuHo
     
-    # Nếu chủ hộ bằng 0 (không có chủ hộ mới) và có chủ hộ cũ
+    # Handle household head change
     if chuHo == 0 and old_chuho > 0:
         # Update old household head's relationship
         old_chuho_nhankhau = NhanKhau.query.get(old_chuho)
@@ -103,12 +123,9 @@ def update_hokhau(maHoKhau):
         # Update old household head's relationship
         old_chuho_nhankhau = NhanKhau.query.get(old_chuho)
         if old_chuho_nhankhau:
-            old_chuho_nhankhau.qhVoiChuHo = "Khác"  
+            old_chuho_nhankhau.qhVoiChuHo = "Khác"
             db.session.add(old_chuho_nhankhau)
-            
-            # Record this change in lichsuhokhau
             noiDung = f"Hộ khẩu ({maHoKhau}) CẬP NHẬT vai trò của Nhân khẩu (ID: {old_chuho}, Họ tên: {old_chuho_nhankhau.hoTen}) từ 'Chủ hộ' -> 'Khác'"
-            
             lich_su = LichSuHoKhauService.create_lichsuhokhau(
                 loaiThayDoi="Sửa",
                 maHoKhau=int(maHoKhau),
@@ -116,19 +133,14 @@ def update_hokhau(maHoKhau):
                 thoiGian=datetime.now(),
                 noiDung=noiDung
             )
-            
             if not lich_su:
                 print("Không thể tạo lịch sử hộ khẩu cho chủ hộ cũ")
         
-        # Update new household head's relationship
         new_chuho_nhankhau = NhanKhau.query.get(chuHo)
         if new_chuho_nhankhau:
             new_chuho_nhankhau.qhVoiChuHo = "Chủ hộ"
             db.session.add(new_chuho_nhankhau)
-            
-            # Record this change in lichsuhokhau
             noiDung = f"Hộ khẩu ({maHoKhau}) CẬP NHẬT vai trò của Nhân khẩu (ID: {chuHo}, Họ tên: {new_chuho_nhankhau.hoTen}) thành 'Chủ hộ'"
-            
             lich_su = LichSuHoKhauService.create_lichsuhokhau(
                 loaiThayDoi="Sửa",
                 maHoKhau=int(maHoKhau),
@@ -136,12 +148,10 @@ def update_hokhau(maHoKhau):
                 thoiGian=datetime.now(),
                 noiDung=noiDung
             )
-            
             if not lich_su:
                 print("Không thể tạo lịch sử hộ khẩu cho chủ hộ mới")
 
-    
-    success = HoKhauService.update_HoKhau(maHoKhau, chuHo, soNha, ngayLap, ngayCapNhat)
+    success = HoKhauService.update_HoKhau(maHoKhau, chuHo, soNha, ngayLap, ngayCapNhat, dienTich, xeMay, oTo)
     if success:
         return jsonify({'success': True, 'message': 'Cập nhật hộ khẩu thành công'}), 200
     else:
@@ -261,7 +271,10 @@ def create_nhankhau():
                 chuHo=new_nhankhau.maNhanKhau,
                 soNha=ho_khau.soNha,
                 ngayLap=ho_khau.ngayLap,
-                ngayCapNhat=datetime.now().date()
+                ngayCapNhat=datetime.now().date(),
+                dienTich=ho_khau.dienTich,
+                xeMay=ho_khau.xeMay,
+                oTo=ho_khau.oTo
             )
         
 
@@ -401,7 +414,10 @@ def update_nhankhau(maNhanKhau):
                     chuHo=0,
                     soNha=old_ho_khau.soNha,
                     ngayLap=old_ho_khau.ngayLap,
-                    ngayCapNhat=datetime.now().date()
+                    ngayCapNhat=datetime.now().date(),
+                    dienTich=old_ho_khau.dienTich,
+                    xeMay=old_ho_khau.xeMay,
+                    oTo=old_ho_khau.oTo
                 )
             # Kiểm tra nếu nhân khẩu chuyển đến hộ khẩu mới với vai trò là chủ hộ
             if quanHeChuHo == 'Chủ hộ':
@@ -423,6 +439,37 @@ def update_nhankhau(maNhanKhau):
                             thoiGian=datetime.now(),
                             noiDung=noiDung_old_chuho
                         )
+        else:
+            if quanHeChuHo == 'Chủ hộ':
+                # Kiểm tra xem hộ khẩu hiện tại đã có chủ hộ chưa
+                if ho_khau.chuHo != 0 and ho_khau.chuHo != maNhanKhau:
+                    # Lấy thông tin chủ hộ hiện tại của hộ khẩu hiện tại
+                    current_chuho = NhanKhauService.get_nhankhau_by_id(ho_khau.chuHo)
+                    if current_chuho:
+                        # Cập nhật quan hệ của chủ hộ hiện tại thành "Khác"
+                        current_chuho.qhVoiChuHo = "Khác"
+                        db.session.add(current_chuho)
+                        
+                        # Lưu lịch sử về việc thay đổi vai trò của chủ hộ hiện tại
+                        noiDung_old_chuho = f"Hộ khẩu ({maHoKhau}) CẬP NHẬT vai trò của Nhân khẩu (ID: {ho_khau.chuHo}, Họ tên: {current_chuho.hoTen}) từ 'Chủ hộ' -> 'Khác'"
+                        LichSuHoKhauService.create_lichsuhokhau(
+                            loaiThayDoi="Sửa",
+                            maHoKhau=int(maHoKhau),
+                            maNhanKhau=ho_khau.chuHo,
+                            thoiGian=datetime.now(),
+                            noiDung=noiDung_old_chuho
+                        )
+                HoKhauService.update_HoKhau(
+                    maHoKhau=int(maHoKhau),
+                    chuHo=maNhanKhau,
+                    soNha=ho_khau.soNha,
+                    ngayLap=ho_khau.ngayLap,
+                    ngayCapNhat=datetime.now().date(),
+                    dienTich=ho_khau.dienTich,
+                    xeMay=ho_khau.xeMay,
+                    oTo=ho_khau.oTo
+                )
+            
         # Cập nhật nhân khẩu
         NhanKhauService.update_nhankhau(
             maNhanKhau=maNhanKhau,
@@ -442,7 +489,10 @@ def update_nhankhau(maNhanKhau):
                 chuHo=maNhanKhau,
                 soNha=ho_khau.soNha,
                 ngayLap=ho_khau.ngayLap,
-                ngayCapNhat=datetime.now().date()
+                ngayCapNhat=datetime.now().date(),
+                dienTich=ho_khau.dienTich,
+                xeMay=ho_khau.xeMay,
+                oTo=ho_khau.oTo
             )
         
         # Nếu có sự thay đổi, thêm vào lịch sử hộ khẩu
@@ -538,7 +588,10 @@ def delete_nhankhau(maNhanKhau):
                 chuHo=0,
                 soNha=ho_khau.soNha,
                 ngayLap=ho_khau.ngayLap,
-                ngayCapNhat=datetime.now().date()
+                ngayCapNhat=datetime.now().date(),
+                dienTich=ho_khau.dienTich,
+                xeMay=ho_khau.xeMay,
+                oTo=ho_khau.oTo
             )
         
         return jsonify({

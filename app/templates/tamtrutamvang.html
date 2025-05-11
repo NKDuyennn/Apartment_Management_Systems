@@ -18,12 +18,12 @@
         {% endif %}
     {% endwith %}
 
-    
+    {% if current_user.vaiTro == 'admin' %}
     <div class="search-container">
         <input type="text" id="searchInput" class="search-box" placeholder="Tìm kiếm ...">
         <button class="add-button" onclick="openAddModal()">+ Thêm Tạm trú/Tạm vắng</button>
     </div>
-
+    {% endif %}
 
     <div class="card">
         <table class="account-table">
@@ -51,12 +51,14 @@
                         <button class="action-button" onclick="viewTTTV({{ tttv.id }})">
                             <i class="fas fa-eye action-icon"></i>
                         </button>
+                        {% if current_user.vaiTro == 'admin' %}
                         <button class="action-button" onclick="editTTTV({{ tttv.id }})">
                             <i class="fas fa-edit action-icon"></i>
                         </button>
                         <button class="action-button" onclick="deleteTTTV({{ tttv.id }})">
                             <i class="fas fa-trash-alt action-icon"></i>
                         </button>
+                        {% endif %}
                     </td>
                 </tr>
                 {% endfor %}
