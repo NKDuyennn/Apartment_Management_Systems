@@ -6,7 +6,7 @@ from app.services.user_service import *
 from app.services.thuphi_service import *
 from app.model import TaiKhoan
 from datetime import date
-
+import locale
 
 auth = Blueprint('auth', __name__)
 
@@ -122,5 +122,45 @@ def home():
                 'ketoan_count': ketoan_count,
                 'new_accounts_this_month': new_accounts_this_month
             })
+    else:
+        locale.setlocale(locale.LC_ALL, 'vi_VN')
+        current_date = date.today()
+        current_year = current_date.year
+        year = current_year
+        current_month = current_date.month        
+        Tong_doanh_thu_du_kien = NopPhiService.gettongtiensecosaukhithuhet(current_year,current_month)
+        So_tien_da_thu_hien_tai = NopPhiService.getsotiendathuduochientai(current_year,current_month)
+        Ty_le_thu,ho_chua_dong = NopPhiService.tylethuhientai(current_year,current_month)
+
+        sodotthutheothang =[]
+        doanhthutheothang = []
+        dem = 1
+        while dem < 5:
+            sodotthutheothang.append(DotThuService.sodotthu(current_year,current_month))
+            np = NopPhiService.doanhthutheothang(current_year,current_month)
+            doanhthu = locale.format_string("%.0f",np, grouping=True)
+            doanhthutheothang.append(doanhthu)
+            current_month -= 1
+            if current_month == 0:
+                current_year -= 1
+                current_month = 12            
+            dem += 1
+            
+        thang1,thang2,thang3,thang4 = sodotthutheothang
+        dt1,dt2,dt3,dt4 = doanhthutheothang
+        current_month += 1
+        stats = {
+            'Tong_doanh_thu_du_kien':locale.format_string("%.0f", Tong_doanh_thu_du_kien, grouping=True),
+            'So_tien_da_thu_hien_tai':locale.format_string("%.0f", So_tien_da_thu_hien_tai, grouping=True),
+            'Ty_le_thu':Ty_le_thu,
+            'ho_chua_dong':ho_chua_dong,
+            'nam_thang1': f"{current_year}-{current_month+3:02d}",'thang1':thang1,'dt1':dt1,
+            'nam_thang2': f"{current_year}-{current_month+2:02d}",'thang2':thang2,'dt2':dt2,
+            'nam_thang3': f"{current_year}-{current_month+1:02d}",'thang3':thang3, 'dt3':dt3,
+            'nam_thang4': f"{current_year}-{current_month:02d}",'thang4':thang4, 'dt4':dt4,
+            'cac_dot_dang_thu': DotThuService.get_active_dotthus()
+        }
+
+
 
     return render_template('home.html', current_user=current_user, stats=stats)
