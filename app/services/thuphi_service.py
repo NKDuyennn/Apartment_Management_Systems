@@ -2,7 +2,8 @@ from app.model import *
 from app import db
 from datetime import datetime
 from sqlalchemy.exc import SQLAlchemyError
-
+from datetime import date
+from sqlalchemy.sql import extract
 class KhoanThuService:
     @staticmethod
     def create_khoanthu(tenKhoanThu, loaiKhoanThu, soTien, loaiSoTien, ghiChu, idNguoiTao):
@@ -162,6 +163,15 @@ class DotThuService:
         except SQLAlchemyError:
             db.session.rollback()
             return False
+    @staticmethod
+    def sodotthu(current_year,current_month):
+        dotthu = db.session.query(DotThu).filter(
+                (extract('year', DotThu.ngayBatDau) == current_year),
+                (extract('month', DotThu.ngayBatDau) == current_month)
+            ).count()
+        return dotthu
+
+
 
 class KhoanThuHasDotThuService:
     @staticmethod
@@ -481,3 +491,38 @@ class NopPhiService:
             KhoanThu_Has_DotThu.maDotThu == maDotThu
         ).scalar()
         return total or 0
+    @staticmethod
+    def gettongtiensecosaukhithuhet(year,month):
+        total = db.session.query(db.func.sum(NopPhi.soTienCanNop)).filter(
+            (extract('year', NopPhi.ngayThu) == year),
+            (extract('month', NopPhi.ngayThu) == month)                 
+        ).scalar()
+        return round(total or 0,0)
+    @staticmethod
+    def getsotiendathuduochientai(year,month):
+        total = db.session.query(db.func.sum(NopPhi.soTienDaNop)).filter(
+            (extract('year', NopPhi.ngayThu) == year),
+            (extract('month', NopPhi.ngayThu) == month)                 
+        ).scalar()
+        return round(total or 0,0)
+    @staticmethod
+    def tylethuhientai(year,month):
+        danop = db.session.query(NopPhi).filter(
+            (NopPhi.soTienCanNop - NopPhi.soTienDaNop == 0),
+            (extract('year', NopPhi.ngayThu) == year),
+            (extract('month', NopPhi.ngayThu) == month)                
+        ).count()
+        phainop = db.session.query(NopPhi).filter(
+            (extract('year', NopPhi.ngayThu) == year),
+            (extract('month', NopPhi.ngayThu) == month)                
+        ).count()
+        hochuadong = phainop-danop
+        return round(danop*100/phainop or 0.00, 2),hochuadong
+
+    @staticmethod
+    def doanhthutheothang(year,month):
+        sotien = db.session.query(db.func.sum(NopPhi.soTienDaNop)).filter(
+                (extract('year', NopPhi.ngayThu) == year),
+                (extract('month', NopPhi.ngayThu) == month)            
+        ).scalar()
+        return sotien if sotien is not None else 0
